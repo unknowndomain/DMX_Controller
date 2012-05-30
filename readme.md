@@ -1,6 +1,8 @@
 DMX Controller
 ==============
 
+[Video demo](http://www.youtube.com/watch?v=LHDk94piS2c)
+
 What is it?
 -----------
 
