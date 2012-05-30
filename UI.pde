@@ -16,10 +16,22 @@ void setupUI() {
       .setColorForeground( 128 );
   }
   
+  cp5.addTextlabel( "presets", "PRESETS", ( num_channels  * 50 ) + 10, 40 )
+    .hide()
+    .setWidth( 300 );
+  
+  for ( int i = 0; i < presets.length; i++ ) {
+    cp5.addButton( "p" + i, 1.0, ( ( num_channels  * 50 ) + ( i % 2 * 95 ) ) + 10, 61 + ( i/2 * 25 ), 85, 15 )
+      .hide()
+      .setLabel( str( i + 1 ) );
+  }
+  
+  cp5.getController( "p0" ).setColorBackground( color( 255, 0, 0 ) );
+
   title = cp5.addTextlabel( "title", mainTitle.toUpperCase() + " - V" + version, 10, 12 )
     .setWidth( 300 );
   
-  connectedLabel = cp5.addTextlabel( "connected", "a" , width - 185, 12 )
+  connectedLabel = cp5.addTextlabel( "connected", "" , width - 185, 12 )
     .hide()
     .setWidth( 175 );
 }

@@ -3,12 +3,17 @@ import controlP5.*;
 
 // Strings
 String mainTitle = "DMX Controller";
-float version = 1;
+float version = 1.1;
 
 int ch;
+int num_channels = 20;
 
 Serial arduino;
 boolean connected = false;
+
+// Presets
+float presets[][] = new float[12][num_channels];
+int current_preset = 0;
 
 // ControlP5 Objects
 ControlP5 cp5;
@@ -17,13 +22,15 @@ Textlabel title, connectedLabel;
 DropdownList serialList;
 
 void setup() {
-  size( ( 20 * 50 ) - 1, 211 );
+  int channel_width = num_channels * 50;
+  int preset_width = 200;
+  size( channel_width + preset_width - 1, 211 );
   frame.setTitle( mainTitle );
   
   setupUI();
 
-  for ( int ch = 0; ch < ( width + 1 ) / 50; ch++ ) {
-    channels[ch] = new Channel( cp5, ch, ch * 50, 30);
+  for ( int ch = 1; ch <= num_channels; ch++ ) {
+    channels[ch-1] = new Channel( cp5, ch, ( ch - 1 ) * 50, 30);
   }
 
   if ( searchForArduino() != -1 )
@@ -43,12 +50,16 @@ void controlEvent(ControlEvent theEvent) {
   if ( theEvent.name() == "serialList" ) {
     connectToArduino( (int)theEvent.group().value() );
   }
-    
-  if ( connected ) {
-    if ( theEvent.name().indexOf( "ch" ) != -1 ) {
-      String cmd = int( theEvent.name().substring( 2, theEvent.name().length() ) ) + "c" + int( theEvent.getValue() ) + "w";
+  
+  if ( ! theEvent.isGroup() ) {
+    if ( theEvent.controller().name().indexOf( "ch" ) != -1 ) {
+      String cmd = int( theEvent.controller().name().substring( 2, theEvent.controller().name().length() ) ) + "c" + int( theEvent.controller().getValue() ) + "w";
       arduino.write( cmd );
-      println( cmd );
+    }
+  
+    if ( theEvent.controller().name().indexOf( "p" ) != -1 ) {
+      int target_preset = int( theEvent.controller().name().substring( 1, theEvent.controller().name().length() ) );
+      switchPreset( target_preset );
     }
   }
 }
@@ -73,9 +84,19 @@ void connectToArduino( int id ) {
         channels[i].slider.show();
       }
     }
+    
+    cp5.getController( "presets" ).show();
+      
+    for ( int i = 0; i < presets.length; i++ ) {
+      cp5.getController( "p" + i ).show();
+    }
   }
 }
 
-void mouseMoved() {
-  
+void keyPressed() {
+  if ( key == '=' )
+    switchPreset( ( current_preset + 1 ) < presets.length ? current_preset + 1 : 0 );
+    
+  if ( key == '-' )
+    switchPreset( ( current_preset - 1 ) >= 0 ? current_preset - 1 : presets.length - 1 );
 }
